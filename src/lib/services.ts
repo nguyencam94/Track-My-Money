@@ -436,3 +436,72 @@ export async function transferFunds(userId: string, sourceFundId: string, target
     handleFirestoreError(error, OperationType.WRITE, `users/${userId}/funds`);
   }
 }
+
+export async function migrateDataToKUnits(userId: string) {
+  try {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      // If already migrated, skip
+      if (userData.migratedToKUnits) return;
+
+      const updates: any = { migratedToKUnits: true };
+      
+      // Threshold lowered: common values in VND are usually > 10,000 (10k)
+      // Most transactions in k-unit won't exceed 10,000k (10 million VND) for daily tracking
+      if (userData.monthlyBudget > 10000) {
+        updates.monthlyBudget = userData.monthlyBudget / 1000;
+      }
+      
+      await updateDoc(userRef, updates);
+    }
+
+    const MIGRATION_THRESHOLD = 10000;
+
+    // Fix funds
+    const fundsSnap = await getDocs(collection(db, 'users', userId, 'funds'));
+    for (const fundDoc of fundsSnap.docs) {
+      const balance = fundDoc.data().balance;
+      if (Math.abs(balance) > MIGRATION_THRESHOLD) {
+        await updateDoc(fundDoc.ref, { balance: balance / 1000 });
+      }
+    }
+
+    // Fix debts
+    const debtsSnap = await getDocs(collection(db, 'users', userId, 'debts'));
+    for (const debtDoc of debtsSnap.docs) {
+      const data = debtDoc.data();
+      const updates: any = {};
+      
+      if (data.totalAmount > MIGRATION_THRESHOLD) updates.totalAmount = data.totalAmount / 1000;
+      if (data.remainingAmount > MIGRATION_THRESHOLD) updates.remainingAmount = data.remainingAmount / 1000;
+      if (data.monthlyInstallment > MIGRATION_THRESHOLD) updates.monthlyInstallment = data.monthlyInstallment / 1000;
+      if (data.principalAmount > MIGRATION_THRESHOLD) updates.principalAmount = data.principalAmount / 1000;
+      
+      if (Object.keys(updates).length > 0) {
+        await updateDoc(debtDoc.ref, updates);
+        
+        // Also fix schedule if it exists
+        const scheduleSnap = await getDocs(collection(db, 'users', userId, 'debts', debtDoc.id, 'schedule'));
+        for (const scheduleDoc of scheduleSnap.docs) {
+          if (scheduleDoc.data().amount > MIGRATION_THRESHOLD) {
+            await updateDoc(scheduleDoc.ref, { amount: scheduleDoc.data().amount / 1000 });
+          }
+        }
+      }
+    }
+
+    // Fix transactions
+    const txSnap = await getDocs(collection(db, 'users', userId, 'transactions'));
+    for (const txDoc of txSnap.docs) {
+      const amount = txDoc.data().amount;
+      if (amount > MIGRATION_THRESHOLD) {
+        await updateDoc(txDoc.ref, { amount: amount / 1000 });
+      }
+    }
+  } catch (error) {
+    console.error('Migration error:', error);
+  }
+}

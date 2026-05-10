@@ -29,33 +29,35 @@ service cloud.firestore {
 
     // Validation Helpers
     function isValidUser(data) {
-      return data.uid == request.auth.uid &&
-             data.email is string && data.email.size() <= 256 &&
+      return data.get('uid', request.auth.uid) == request.auth.uid &&
+             (data.get('email', '') is string && data.get('email', '').size() <= 256) &&
              (data.get('displayName', '') is string && data.get('displayName', '').size() <= 256) &&
-             (data.get('currency', 'VND') in ['VND', 'USD', 'EUR']) &&
+             (data.get('currency', 'VND') in ['VND', 'USD', 'EUR', 'k-VND']) &&
              (data.get('monthlyBudget', 0) is number) &&
              (data.get('editPassword', null) == null || (data.editPassword is string && data.editPassword.size() <= 64)) &&
-             (data.get('createdAt', null) == null || data.createdAt is string);
+             (data.get('createdAt', null) == null || data.createdAt is string) &&
+             (data.get('migratedToKUnits', false) is bool);
     }
 
     function isValidTransaction(data) {
-      return data.userId == request.auth.uid &&
-             data.amount is number && data.amount >= 0 &&
-             data.type in ['income', 'expense'] &&
-             data.date is timestamp &&
+      return data.get('userId', request.auth.uid) == request.auth.uid &&
+             (data.get('amount', 0) is number && data.get('amount', 0) >= 0) &&
+             (data.get('type', 'expense') in ['income', 'expense']) &&
+             (data.get('date', request.time) is timestamp) &&
              (data.get('category', '') is string && data.get('category', '').size() <= 100) &&
              (data.get('note', '') is string && data.get('note', '').size() <= 1000) &&
              (data.get('debtId', null) == null || isValidId(data.debtId)) &&
-             (data.get('fundId', null) == null || isValidId(data.fundId));
+             (data.get('fundId', null) == null || isValidId(data.fundId)) &&
+             (data.get('isTransfer', false) is bool);
     }
 
     function isValidDebt(data) {
-      return data.userId == request.auth.uid &&
-             data.title is string && data.title.size() <= 200 &&
-             data.totalAmount is number && data.totalAmount >= 0 &&
-             data.remainingAmount is number && data.remainingAmount >= 0 &&
-             data.status in ['active', 'paid'] &&
-             data.startDate is timestamp &&
+      return data.get('userId', request.auth.uid) == request.auth.uid &&
+             (data.get('title', '') is string && data.get('title', '').size() <= 200) &&
+             (data.get('totalAmount', 0) is number && data.get('totalAmount', 0) >= 0) &&
+             (data.get('remainingAmount', 0) is number && data.get('remainingAmount', 0) >= 0) &&
+             (data.get('status', 'active') in ['active', 'paid']) &&
+             (data.get('startDate', request.time) is timestamp) &&
              (data.get('lender', '') is string && data.get('lender', '').size() <= 200) &&
              (data.get('principalAmount', 0) is number) &&
              (data.get('category', '') is string && data.get('category', '').size() <= 100) &&
@@ -66,18 +68,20 @@ service cloud.firestore {
     }
 
     function isValidSchedule(data) {
-      return data.userId == request.auth.uid &&
-             isValidId(data.debtId) &&
-             data.dueDate is timestamp &&
-             data.amount is number && data.amount > 0 &&
-             data.status in ['pending', 'paid'];
+      return data.get('userId', request.auth.uid) == request.auth.uid &&
+             (data.get('debtId', 'valid') is string) &&
+             (data.get('dueDate', request.time) is timestamp) &&
+             (data.get('amount', 0) is number && data.get('amount', 0) >= 0) &&
+             (data.get('status', 'pending') in ['pending', 'paid']) &&
+             (data.get('paidAt', null) == null || data.paidAt is timestamp) &&
+             (data.get('transactionId', null) == null || isValidId(data.transactionId));
     }
 
     function isValidFund(data) {
-      return data.userId == request.auth.uid &&
-             data.name is string && data.name.size() <= 100 &&
-             data.type in ['consumption', 'savings', 'debt', 'investment'] &&
-             data.balance is number &&
+      return data.get('userId', request.auth.uid) == request.auth.uid &&
+             (data.get('name', '') is string && data.get('name', '').size() <= 100) &&
+             (data.get('type', 'consumption') in ['consumption', 'savings', 'debt', 'investment']) &&
+             (data.get('balance', 0) is number) &&
              (data.get('description', '') is string && data.get('description', '').size() <= 500) &&
              (data.get('icon', '') is string && data.get('icon', '').size() <= 50) &&
              (data.get('createdAt', null) == null || data.createdAt is timestamp);
@@ -86,18 +90,15 @@ service cloud.firestore {
     // Collection Matches
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow create: if isOwner(userId) && 
-                    isValidUser(incoming()) && 
-                    incoming().keys().hasAll(['uid', 'email', 'displayName', 'currency', 'monthlyBudget', 'createdAt']) &&
-                    incoming().keys().size() == 6;
+      allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) &&
-                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'currency', 'monthlyBudget', 'editPassword']);
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'currency', 'monthlyBudget', 'editPassword', 'migratedToKUnits']);
 
       match /transactions/{transactionId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && isValidTransaction(incoming());
         allow update: if isOwner(userId) && isValidTransaction(incoming()) &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'type', 'category', 'note', 'date', 'fundId', 'debtId']);
+                      incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'type', 'category', 'note', 'date', 'fundId', 'debtId', 'isTransfer']);
         allow delete: if isOwner(userId);
       }
 
@@ -112,7 +113,7 @@ service cloud.firestore {
           allow read: if isOwner(userId);
           allow create: if isOwner(userId) && isValidSchedule(incoming());
           allow update: if isOwner(userId) && isValidSchedule(incoming()) &&
-                        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paidAt', 'transactionId']);
+                        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paidAt', 'transactionId', 'amount']);
           allow delete: if isOwner(userId);
         }
       }

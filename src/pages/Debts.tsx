@@ -595,7 +595,7 @@ export default function Debts() {
                           placeholder="0" 
                           className="w-full px-4 pr-12 py-3.5 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none" 
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">.000 (K)</span>
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">k</span>
                       </div>
                       {principalInput !== '' && Number(principalInput) > 0 && (
                         <p className="text-[10px] text-blue-600 font-bold italic mt-1 px-1">
@@ -617,7 +617,7 @@ export default function Debts() {
                           placeholder="0" 
                           className="w-full px-4 pr-12 py-3.5 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none" 
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">.000 (K)</span>
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">k</span>
                       </div>
                       {amountInput !== '' && Number(amountInput) > 0 && (
                         <p className="text-[10px] text-blue-600 font-bold italic mt-1 px-1">
@@ -637,7 +637,7 @@ export default function Debts() {
                           placeholder="0" 
                           className="w-full px-4 pr-12 py-3.5 bg-slate-50 border-none rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none" 
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">.000 (K)</span>
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">k</span>
                       </div>
                       {installmentInput !== '' && Number(installmentInput) > 0 && (
                         <p className="text-[10px] text-blue-600 font-bold italic mt-1 px-1">

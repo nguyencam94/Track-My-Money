@@ -4,7 +4,7 @@ import { useTransactionModal } from '../context/TransactionModalContext';
 import { useTransferModal } from '../context/TransferModalContext';
 import { subscribeTransactions, subscribeDebts, subscribeFunds, initializeFunds, updateFundBalance, resetAllFunds, deleteAllTransactions } from '../lib/services';
 import { formatCurrency, cn } from '../lib/utils';
-import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, Clock, ShoppingBag, PiggyBank, CreditCard, Briefcase, ChevronRight, Edit2, RotateCcw, Trash2, X, ArrowRightLeft } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, Clock, ShoppingBag, PiggyBank, CreditCard, Briefcase, ChevronRight, Edit2, RotateCcw, Trash2, X, ArrowRightLeft, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Dashboard() {
@@ -111,34 +111,6 @@ export default function Dashboard() {
               <TrendingUp className="w-3 h-3" />
               <span>Sẵn sàng</span>
             </div>
-            
-            {!showConfirmClear ? (
-              <button
-                onClick={() => setShowConfirmClear(true)}
-                disabled={isClearingHistory || transactions.length === 0}
-                className="text-[10px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50"
-              >
-                <Trash2 className="w-3 h-3" />
-                Xóa lịch sử & Reset
-              </button>
-            ) : (
-              <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-300">
-                <span className="text-[10px] font-bold text-rose-600 mr-1">Xác nhận?</span>
-                <button
-                  onClick={handleClearHistory}
-                  disabled={isClearingHistory}
-                  className="bg-rose-600 text-white px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-rose-700 transition-all"
-                >
-                  {isClearingHistory ? '...' : 'Có'}
-                </button>
-                <button
-                  onClick={() => setShowConfirmClear(false)}
-                  className="bg-indigo-50 text-indigo-400 px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-indigo-100 transition-all"
-                >
-                  Hủy
-                </button>
-              </div>
-            )}
           </div>
         </motion.div>
 
@@ -256,7 +228,7 @@ export default function Dashboard() {
                           className="w-full bg-transparent border-none p-0 text-md md:text-lg font-black text-indigo-900 focus:ring-0 outline-none"
                           placeholder="0"
                         />
-                        <span className="text-xs font-bold text-indigo-400 mr-1">K</span>
+                        <span className="text-xs font-bold text-indigo-400 mr-1">k</span>
                         <button 
                           onClick={async () => {
                             if (profile?.uid) {
@@ -304,48 +276,76 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Recent Transactions - Takes 2 columns */}
         <section className="lg:col-span-2 flex flex-col bg-white rounded-3xl border border-indigo-100 shadow-sm overflow-hidden">
-          <div className="p-5 md:p-6 border-b border-indigo-100 flex justify-between items-center">
-            <h3 className="text-md md:text-lg font-bold text-indigo-950">Giao dịch gần đây</h3>
-            <a href="/transactions" className="text-xs md:text-sm text-indigo-600 font-medium cursor-pointer hover:underline">Xem hết</a>
+          <div className="p-5 md:p-6 border-b border-indigo-100 flex justify-between items-center bg-indigo-50/10">
+            <h3 className="text-md md:text-lg font-bold text-indigo-950 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-600" />
+              Giao dịch gần đây
+            </h3>
+            <a href="/transactions" className="text-xs md:text-sm text-indigo-600 font-bold cursor-pointer hover:underline">Xem hết</a>
           </div>
-          <div className="p-4 md:p-6 overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="text-[10px] text-indigo-300 uppercase tracking-widest border-b border-indigo-50/50">
-                <tr>
-                  <th className="py-3 font-semibold uppercase tracking-widest">Khoản mục</th>
-                  <th className="py-3 font-semibold uppercase tracking-widest text-right">Số tiền</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-indigo-50/50">
-                {transactions.slice(0, 5).map((t) => (
-                  <tr key={t.id} className="group hover:bg-indigo-50/30 transition-colors">
-                    <td className="py-4 cursor-pointer" onClick={() => openTransactionModal(t)}>
-                      <div className="font-bold text-indigo-950 text-sm group-hover:text-indigo-600 transition-colors">{t.category}</div>
-                      <div className="text-[10px] text-indigo-400">
-                        {t.date.toLocaleDateString('vi-VN')} • {t.date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} • {t.note || '-'}
-                      </div>
-                    </td>
-                    <td className="py-4 text-right">
-                      <div className={cn(
-                        "font-black text-sm",
-                        t.type === 'income' ? "text-emerald-600" : "text-indigo-950"
-                      )}>
-                        {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
-                      </div>
-                      <button 
-                        onClick={() => openTransactionModal(t)}
-                        className="opacity-0 group-hover:opacity-100 text-[9px] font-bold text-indigo-600 uppercase hover:underline"
-                      >
-                        Sửa
-                      </button>
-                    </td>
-                  </tr>
+          <div className="p-4 md:p-6 overflow-hidden max-h-[600px] overflow-y-auto">
+            {transactions.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="w-16 h-16 bg-indigo-50 text-indigo-200 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="w-8 h-8" />
+                </div>
+                <p className="text-indigo-400 font-medium">Chưa có giao dịch nào được ghi lại.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {Object.entries(
+                  transactions.slice(0, 15).reduce((groups: any, t) => {
+                    const date = t.date.toLocaleDateString('vi-VN', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    });
+                    if (!groups[date]) groups[date] = [];
+                    groups[date].push(t);
+                    return groups;
+                  }, {})
+                ).map(([date, items]: [string, any]) => (
+                  <div key={date} className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-indigo-50" />
+                      <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{date}</span>
+                      <div className="h-px flex-1 bg-indigo-50" />
+                    </div>
+                    <div className="space-y-2">
+                      {items.map((t: any) => (
+                        <div 
+                          key={t.id} 
+                          onClick={() => openTransactionModal(t)}
+                          className="group flex items-center justify-between p-4 bg-indigo-50/20 hover:bg-indigo-50/50 rounded-2xl border border-transparent hover:border-indigo-100 transition-all cursor-pointer"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm",
+                              t.type === 'income' ? "bg-emerald-500" : "bg-indigo-600"
+                            )}>
+                              {t.type === 'income' ? <TrendingDown className="w-5 h-5 rotate-180" /> : <TrendingDown className="w-5 h-5" />}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-indigo-950 text-sm truncate">{t.category}</div>
+                              <div className="text-[10px] text-indigo-400 truncate flex items-center gap-1">
+                                <span>{t.date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>•</span>
+                                <span className="italic">{t.note || 'Không có ghi chú'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className={cn(
+                            "font-black text-sm",
+                            t.type === 'income' ? "text-emerald-600" : "text-indigo-950"
+                          )}>
+                            {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-            {transactions.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-indigo-400">Chưa có giao dịch nào.</p>
               </div>
             )}
           </div>
@@ -353,41 +353,43 @@ export default function Dashboard() {
 
         {/* Debt Overview - Side Column */}
         <section className="flex flex-col gap-4 md:gap-6">
-          <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm flex-1">
-            <h3 className="text-[10px] font-bold text-slate-400 mb-6 uppercase tracking-widest opacity-60">Lịch trả nợ tiếp theo</h3>
+          <div className="bg-white p-5 md:p-6 rounded-3xl border border-indigo-100 shadow-sm flex-1">
+            <h3 className="text-[10px] font-black text-indigo-400 mb-6 uppercase tracking-widest pl-1">Lịch trả nợ tiếp theo</h3>
             <div className="space-y-4">
               {activeDebts.slice(0, 3).map((debt) => (
-                <div key={debt.id} className="flex gap-3 items-start">
-                  <div className="bg-orange-100 text-orange-600 w-9 h-11 md:w-10 md:h-12 rounded-xl flex flex-col items-center justify-center font-bold flex-shrink-0">
-                    <span className="text-[8px] md:text-[10px] leading-none uppercase">Kỳ</span>
+                <div key={debt.id} className="flex gap-3 items-start group">
+                  <div className="bg-amber-50 text-amber-600 w-9 h-11 md:w-10 md:h-12 rounded-xl flex flex-col items-center justify-center font-black flex-shrink-0 group-hover:bg-amber-100 transition-colors">
+                    <span className="text-[8px] md:text-[9px] leading-none uppercase">Kỳ</span>
                     <span className="text-md md:text-lg leading-none">kế</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs md:text-sm font-bold text-slate-800 truncate">{debt.title}</p>
-                    <p className="text-[10px] md:text-xs text-slate-500 truncate">{debt.lender}</p>
-                    <p className="text-[10px] md:text-xs font-bold text-orange-600 mt-1">{formatCurrency(debt.monthlyInstallment || 0)} / kỳ</p>
+                    <p className="text-xs md:text-sm font-black text-indigo-950 truncate group-hover:text-indigo-600 transition-colors cursor-pointer">{debt.title}</p>
+                    <p className="text-[10px] md:text-xs text-indigo-400 truncate">{debt.lender}</p>
+                    <p className="text-[10px] md:text-xs font-black text-amber-600 mt-1">{formatCurrency(debt.monthlyInstallment || 0)} / kỳ</p>
                   </div>
                 </div>
               ))}
               {activeDebts.length === 0 && (
-                <p className="text-slate-400 text-xs italic">Chưa có khoản nợ nào.</p>
+                <div className="text-center py-6">
+                  <p className="text-indigo-300 text-xs font-medium italic">Chưa có khoản nợ nào.</p>
+                </div>
               )}
             </div>
             
-            <div className="mt-8 pt-6 border-t border-slate-100">
-              <div className="bg-slate-900 text-white p-4 rounded-2xl">
-                 <p className="text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-widest">Dư nợ còn lại</p>
+            <div className="mt-8 pt-6 border-t border-indigo-50">
+              <div className="bg-indigo-950 text-white p-5 rounded-2xl shadow-lg shadow-indigo-100">
+                 <p className="text-[9px] uppercase font-black text-indigo-400/60 mb-1 tracking-widest">Dư nợ còn lại</p>
                  <div className="flex justify-between items-end">
-                   <span className="text-lg md:text-xl font-black">{formatCurrency(totalDebtRemaining)}</span>
-                   <span className="text-[10px] text-emerald-400">-{activeDebts.length} mục</span>
+                   <span className="text-xl md:text-2xl font-black">{formatCurrency(totalDebtRemaining)}</span>
+                   <span className="text-[10px] font-black text-emerald-400">{activeDebts.length} mục</span>
                  </div>
               </div>
             </div>
           </div>
           
-          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
-            <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-2">Ghi chú tài chính</p>
-            <p className="text-sm text-blue-900 leading-relaxed italic">"Tiết kiệm là cách tốt nhất để xây dựng tương lai vững chắc."</p>
+          <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+            <p className="text-xs text-indigo-600 font-black uppercase tracking-widest pl-1 mb-2">Ghi chú tài chính</p>
+            <p className="text-sm text-indigo-900 leading-relaxed italic font-medium">"Kế hoạch tài chính tốt là bước đệm đầu tiên cho sự tự do thực sự."</p>
           </div>
         </section>
       </div>

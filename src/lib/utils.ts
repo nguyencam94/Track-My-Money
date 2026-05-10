@@ -7,15 +7,14 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number) {
   // Directly use the number as 'thousands'
-  return new Intl.NumberFormat('vi-VN').format(amount) + 'K';
+  return new Intl.NumberFormat('vi-VN').format(amount) + 'k';
 }
 
 export function numberToVietnameseWords(number: number): string {
   if (number === 0) return 'Không nghìn đồng';
   // Note: We treat the input number as 'thousands' of VND
-  const actualValue = number * 1000;
+  const actualValue = Math.abs(number) * 1000;
   
-  if (actualValue < 0) return 'Số âm';
   if (actualValue > 1000000000000) return 'Số quá lớn';
 
   const units = ['', 'nghìn', 'triệu', 'tỷ'];
@@ -24,7 +23,7 @@ export function numberToVietnameseWords(number: number): string {
   let result = '';
   let unitIndex = 0;
 
-  let tempNumber = Math.abs(actualValue);
+  let tempNumber = actualValue;
 
   while (tempNumber > 0) {
     const chunk = tempNumber % 1000;

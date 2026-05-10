@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { migrateDataToKUnits } from '../lib/services';
 
 interface UserProfile {
   uid: string;
@@ -63,6 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await setDoc(profileRef, newProfile);
           setProfile(newProfile);
         }
+        
+        // Auto-fix large values if detected (User migration to k-units)
+        await migrateDataToKUnits(currUser.uid);
+        
       } else {
         setProfile(null);
       }

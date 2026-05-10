@@ -168,12 +168,12 @@ export default function TransactionModal() {
           animate={{ opacity: 1, x: 0 }}
           className="space-y-6 py-10 flex flex-col items-center text-center"
         >
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mb-4">
             <Lock className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Xác thực quyền sửa</h3>
-            <p className="text-sm text-slate-500 font-medium px-6 mt-2">Vui lòng nhập mật khẩu để mở khóa thông tin giao dịch này.</p>
+            <h3 className="text-xl font-black text-indigo-950 tracking-tight">Xác thực quyền sửa</h3>
+            <p className="text-sm text-indigo-500 font-medium px-6 mt-2">Vui lòng nhập mật khẩu để mở khóa thông tin giao dịch này.</p>
           </div>
           
           <form onSubmit={handleVerifyPassword} className="w-full max-w-xs space-y-4">
@@ -187,8 +187,8 @@ export default function TransactionModal() {
                 setPasswordError(false);
               }}
               className={cn(
-                "w-full text-center p-4 bg-slate-50 border-2 rounded-2xl font-black tracking-widest text-xl focus:ring-0 outline-none transition-all",
-                passwordError ? "border-rose-400 bg-rose-50 text-rose-600 animate-shake" : "border-transparent focus:border-blue-600"
+                "w-full text-center p-4 bg-indigo-50 border-2 rounded-2xl font-black tracking-widest text-xl focus:ring-0 outline-none transition-all",
+                passwordError ? "border-rose-400 bg-rose-50 text-rose-600 animate-shake" : "border-transparent focus:border-indigo-600"
               )}
             />
             {passwordError && (
@@ -199,13 +199,13 @@ export default function TransactionModal() {
               <button
                 type="button"
                 onClick={close}
-                className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all"
+                className="flex-1 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-100 transition-all"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                className="flex-[2] py-4 bg-indigo-950 text-white rounded-2xl font-black text-sm hover:bg-indigo-900 transition-all shadow-lg shadow-indigo-100"
               >
                 Mở khóa
               </button>
@@ -217,9 +217,9 @@ export default function TransactionModal() {
           <div className="space-y-5 md:space-y-6">
             {/* Amount Input */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Số tiền (K)</label>
+                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Số tiền (k)</label>
                   <div className="relative group">
-                    <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 transition-transform group-focus-within:scale-110">
+                    <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 transition-transform group-focus-within:scale-110">
                       <DollarSign className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
                     <input 
@@ -230,15 +230,15 @@ export default function TransactionModal() {
                       placeholder="0" 
                       value={amountInput}
                       onChange={(e) => setAmountInput(e.target.value)}
-                      className="w-full pl-14 md:pl-16 pr-14 md:pr-16 py-4 md:py-5 bg-slate-50 border-2 border-transparent rounded-[1.2rem] md:rounded-[1.5rem] text-2xl md:text-3xl font-black text-slate-900 focus:ring-0 focus:border-blue-600 transition-all outline-none placeholder:text-slate-200" 
+                      className="w-full pl-14 md:pl-16 pr-14 md:pr-16 py-4 md:py-5 bg-indigo-50/50 border-2 border-transparent rounded-[1.2rem] md:rounded-[1.5rem] text-2xl md:text-3xl font-black text-indigo-950 focus:ring-0 focus:border-indigo-600 transition-all outline-none placeholder:text-indigo-200" 
                     />
-                    <span className="absolute right-5 md:right-6 top-1/2 -translate-y-1/2 text-lg md:text-xl font-black text-slate-400 italic">.000</span>
+                    <span className="absolute right-5 md:right-6 top-1/2 -translate-y-1/2 text-lg md:text-xl font-black text-indigo-300 italic">k</span>
                   </div>
                   {amountInput !== '' && Number(amountInput) > 0 && (
                     <motion.p 
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="text-[11px] text-blue-600 font-black italic mt-1 px-1 tracking-tight"
+                      className="text-[11px] text-indigo-600 font-black italic mt-1 px-1 tracking-tight"
                     >
                       {numberToVietnameseWords(Number(amountInput))}
                     </motion.p>
@@ -247,8 +247,8 @@ export default function TransactionModal() {
 
                 <div className="grid grid-cols-2 gap-3 md:gap-4">
                   <div className="space-y-2 md:space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Loại hình</label>
-                    <div className="relative bg-slate-50 p-1 rounded-2xl flex border-2 border-transparent focus-within:border-blue-600 transition-all">
+                    <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Loại hình</label>
+                    <div className="relative bg-indigo-50/50 p-1 rounded-2xl flex border-2 border-transparent focus-within:border-indigo-600 transition-all">
                       <button
                         type="button"
                         onClick={() => {
@@ -258,8 +258,8 @@ export default function TransactionModal() {
                         className={cn(
                           "flex-1 py-2 md:py-3 rounded-xl text-[10px] md:text-xs font-black uppercase transition-all",
                           modalType === 'expense' 
-                            ? "bg-white text-slate-900 shadow-sm" 
-                            : "text-slate-400 hover:text-slate-500"
+                            ? "bg-white text-indigo-950 shadow-sm" 
+                            : "text-indigo-400 hover:text-indigo-500"
                         )}
                       >
                         Chi
@@ -273,8 +273,8 @@ export default function TransactionModal() {
                         className={cn(
                           "flex-1 py-2 md:py-3 rounded-xl text-[10px] md:text-xs font-black uppercase transition-all",
                           modalType === 'income' 
-                            ? "bg-white text-blue-600 shadow-sm" 
-                            : "text-slate-400 hover:text-slate-500"
+                            ? "bg-white text-indigo-600 shadow-sm" 
+                            : "text-indigo-400 hover:text-indigo-500"
                         )}
                       >
                         Thu
@@ -283,7 +283,7 @@ export default function TransactionModal() {
                     </div>
                   </div>
                   <div className="space-y-2 md:space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Thời gian</label>
+                    <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Thời gian</label>
                     <div className="flex gap-2">
                       <input 
                         name="date" 
@@ -291,17 +291,17 @@ export default function TransactionModal() {
                         required 
                         value={dateInput}
                         onChange={(e) => setDateInput(e.target.value)}
-                        className="flex-1 min-w-0 px-3 md:px-4 py-3 md:py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:ring-0 focus:border-blue-600 transition-all font-bold text-slate-700 text-xs md:text-sm outline-none" 
+                        className="flex-1 min-w-0 px-3 md:px-4 py-3 md:py-4 bg-indigo-50/50 border-2 border-transparent rounded-2xl focus:ring-0 focus:border-indigo-600 transition-all font-bold text-indigo-700 text-xs md:text-sm outline-none" 
                       />
                       <div className="relative">
-                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                        <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-indigo-400 pointer-events-none" />
                         <input 
                           name="time" 
                           type="time" 
                           required 
                           value={timeInput}
                           onChange={(e) => setTimeInput(e.target.value)}
-                          className="w-24 md:w-28 pl-8 pr-2 py-3 md:py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:ring-0 focus:border-blue-600 transition-all font-bold text-slate-700 text-xs md:text-sm outline-none" 
+                          className="w-24 md:w-28 pl-8 pr-2 py-3 md:py-4 bg-indigo-50/50 border-2 border-transparent rounded-2xl focus:ring-0 focus:border-indigo-600 transition-all font-bold text-indigo-700 text-xs md:text-sm outline-none" 
                         />
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export default function TransactionModal() {
 
                 {/* Fund Selection */}
                 <div className="space-y-2 md:space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Áp dụng từ quỹ</label>
+                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Áp dụng từ quỹ</label>
                   <div className="grid grid-cols-2 gap-2 md:gap-3">
                     {funds.map((fund) => (
                       <button
@@ -320,13 +320,13 @@ export default function TransactionModal() {
                         className={cn(
                           "flex items-center gap-2 md:gap-3 px-3 md:px-4 py-3 md:py-4 rounded-2xl border-2 transition-all text-left group",
                           selectedFund === fund.id
-                            ? "bg-blue-50 border-blue-600 text-blue-900 shadow-md"
-                            : "bg-slate-50 border-transparent text-slate-500 hover:bg-slate-100"
+                            ? "bg-indigo-50 border-indigo-600 text-indigo-900 shadow-md"
+                            : "bg-indigo-50/30 border-transparent text-indigo-400 hover:bg-indigo-50"
                         )}
                       >
                         <div className={cn(
                           "w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center transition-transform group-active:scale-90",
-                          selectedFund === fund.id ? "bg-blue-600 text-white" : "bg-white text-slate-400"
+                          selectedFund === fund.id ? "bg-indigo-600 text-white" : "bg-white text-indigo-300"
                         )}>
                           <Wallet className="w-4 h-4 md:w-5 md:h-5" />
                         </div>
@@ -341,7 +341,7 @@ export default function TransactionModal() {
 
                 {/* Category Selection */}
                 <div className="space-y-3 md:space-y-4 pt-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Danh mục gợi ý</label>
+                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Danh mục gợi ý</label>
                   <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {dynamicCategories.map((cat) => (
                       <button
@@ -351,8 +351,8 @@ export default function TransactionModal() {
                         className={cn(
                           "px-3 md:px-5 py-1.5 md:py-2.5 rounded-full text-[10px] md:text-xs font-black transition-all border-2",
                           selectedCategory === cat 
-                            ? "bg-slate-900 border-slate-900 text-white shadow-lg" 
-                            : "bg-white border-slate-100 text-slate-600 hover:border-slate-300"
+                            ? "bg-indigo-950 border-indigo-950 text-white shadow-lg" 
+                            : "bg-white border-indigo-50 text-indigo-600 hover:border-indigo-200"
                         )}
                       >
                         {cat}
@@ -361,7 +361,7 @@ export default function TransactionModal() {
                   </div>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center">
-                       <div className="w-2 h-2 rounded-full bg-blue-600" />
+                       <div className="w-2 h-2 rounded-full bg-indigo-600" />
                     </div>
                     <input 
                       name="category" 
@@ -369,19 +369,19 @@ export default function TransactionModal() {
                       placeholder="Tên khoản mục..." 
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 md:py-4 bg-slate-50 border-2 border-transparent rounded-2xl font-black text-slate-900 text-sm focus:ring-0 focus:border-blue-600 transition-all outline-none placeholder:font-bold placeholder:text-slate-300" 
+                      className="w-full pl-10 pr-4 py-3 md:py-4 bg-indigo-50/50 border-2 border-transparent rounded-2xl font-black text-indigo-950 text-sm focus:ring-0 focus:border-indigo-600 transition-all outline-none placeholder:font-bold placeholder:text-indigo-200" 
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2 md:space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Ghi chú thêm</label>
+                  <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest pl-1">Ghi chú thêm</label>
                   <textarea 
                     name="note" 
                     placeholder="Mua sắm ở đâu, cho ai..." 
                     value={noteInput}
                     onChange={(e) => setNoteInput(e.target.value)}
-                    className="w-full px-4 md:px-5 py-4 md:py-5 bg-slate-50 border-2 border-transparent rounded-[1.2rem] md:rounded-[1.5rem] font-bold text-slate-700 text-sm focus:ring-0 focus:border-blue-600 transition-all h-20 md:h-28 resize-none outline-none placeholder:text-slate-300" 
+                    className="w-full px-4 md:px-5 py-4 md:py-5 bg-indigo-50/50 border-2 border-transparent rounded-[1.2rem] md:rounded-[1.5rem] font-bold text-indigo-700 text-sm focus:ring-0 focus:border-indigo-600 transition-all h-20 md:h-28 resize-none outline-none placeholder:text-indigo-200" 
                   />
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function TransactionModal() {
               <div className="pt-2 sticky bottom-0 bg-white/50 backdrop-blur-sm -mx-5 md:-mx-8 px-5 md:px-8 pb-4">
                 <button 
                   type="submit" 
-                  className="w-full bg-blue-600 text-white py-4 md:py-6 rounded-[1.2rem] md:rounded-[1.5rem] font-black text-md md:text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95"
+                  className="w-full bg-indigo-950 text-white py-4 md:py-6 rounded-[1.2rem] md:rounded-[1.5rem] font-black text-md md:text-lg hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 active:scale-95"
                 >
                   Hoàn tất
                 </button>
@@ -408,26 +408,26 @@ export default function TransactionModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={close}
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            className="absolute inset-0 bg-indigo-950/60 backdrop-blur-md"
           />
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 40 }}
-            className="relative w-full max-w-lg bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100"
+            className="relative w-full max-w-lg bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-2xl overflow-hidden border border-indigo-100"
           >
-            <div className="p-5 md:p-8 border-b border-slate-50 flex items-center justify-between">
+            <div className="p-5 md:p-8 border-b border-indigo-50 flex items-center justify-between">
               <div>
-                <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                <h2 className="text-xl md:text-2xl font-black text-indigo-950 tracking-tight">
                   {isVerifyingPassword ? 'Bảo mật' : (editingTransaction ? 'Chỉnh sửa giao dịch' : 'Giao dịch mới')}
                 </h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mt-1">
                   {isVerifyingPassword ? 'Yêu cầu xác thực' : (editingTransaction ? 'Cập nhật lại thông tin đã lưu' : 'Ghi lại thu nhập/chi tiêu')}
                 </p>
               </div>
               <button 
                 onClick={close} 
-                className="p-2.5 md:p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-slate-900 border border-transparent hover:border-slate-100"
+                className="p-2.5 md:p-3 hover:bg-indigo-50 rounded-2xl transition-all text-indigo-400 hover:text-indigo-900 border border-transparent hover:border-indigo-100"
               >
                 <X className="w-5 h-5 md:w-6 md:h-6" />
               </button>
