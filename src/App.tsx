@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TransactionModalProvider } from './context/TransactionModalContext';
@@ -16,6 +16,35 @@ import { PieChart } from 'lucide-react';
 import { motion } from 'motion/react';
 
 function Login() {
+  const { user, loading: authLoading } = useAuth();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (!authLoading && user) {
+    return <Navigate to="/" />;
+  }
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true);
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      console.error("Login error:", err);
+      if (err.code === 'auth/popup-blocked') {
+        setError('Trình duyệt đã chặn cửa sổ đăng nhập. Vui lòng kiểm tra cài đặt popup.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        // Just reset, user closed it
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('Lỗi kết nối mạng. Vui lòng kiểm tra lại internet.');
+      } else {
+        setError('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.');
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-indigo-50/50">
       <motion.div 
@@ -30,12 +59,25 @@ function Login() {
         <p className="text-indigo-500 mb-10 font-medium">Quản lý tài chính & nợ cá nhân<br />thông minh và cân bằng.</p>
         
         <button
-          onClick={signInWithGoogle}
-          className="w-full bg-indigo-950 text-white py-4 rounded-2xl font-bold hover:bg-indigo-900 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-200"
+          onClick={handleLogin}
+          disabled={isLoggingIn}
+          className="w-full bg-indigo-950 text-white py-4 rounded-2xl font-bold hover:bg-indigo-900 transition-all flex items-center justify-center gap-3 shadow-lg shadow-indigo-200 disabled:opacity-50"
         >
-          <img src="https://www.google.com/favicon.ico" className="w-5 h-5 bg-white rounded-full p-0.5" alt="Google" />
-          Tiếp tục với Google
+          {isLoggingIn ? (
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+          ) : (
+            <>
+              <img src="https://www.google.com/favicon.ico" className="w-5 h-5 bg-white rounded-full p-0.5" alt="Google" />
+              Tiếp tục với Google
+            </>
+          )}
         </button>
+
+        {error && (
+          <p className="mt-4 text-xs font-bold text-rose-600 animate-in fade-in slide-in-from-top-1">
+            {error}
+          </p>
+        )}
 
         <div className="mt-8 pt-8 border-t border-indigo-50 w-full">
           <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Powered by Geometric Balance</p>

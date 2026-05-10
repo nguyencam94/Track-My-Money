@@ -44,34 +44,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (currUser) => {
-      setUser(currUser);
       if (currUser) {
+        setUser(currUser);
         const profileRef = doc(db, 'users', currUser.uid);
-        const profileSnap = await getDoc(profileRef);
+        let profileData: UserProfile | null = null;
         
-        if (profileSnap.exists()) {
-          setProfile(profileSnap.data() as UserProfile);
-        } else {
-          // Initialize profile
-          const newProfile = {
-            uid: currUser.uid,
-            email: currUser.email || '',
-            displayName: currUser.displayName || 'User',
-            currency: 'VND',
-            monthlyBudget: 0,
-            createdAt: new Date().toISOString()
-          };
-          await setDoc(profileRef, newProfile);
-          setProfile(newProfile);
+        try {
+          const profileSnap = await getDoc(profileRef);
+          if (profileSnap.exists()) {
+            profileData = profileSnap.data() as UserProfile;
+            setProfile(profileData);
+          } else {
+            // Initialize profile
+            profileData = {
+              uid: currUser.uid,
+              email: currUser.email || '',
+              displayName: currUser.displayName || 'User',
+              currency: 'VND',
+              monthlyBudget: 0,
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(profileRef, profileData);
+            setProfile(profileData);
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
         }
+
+        // Finish loading as soon as we have user and profile
+        setLoading(false);
         
-        // Auto-fix large values if detected (User migration to k-units)
-        await migrateDataToKUnits(currUser.uid);
+        // Run migration in background without blocking the UI
+        migrateDataToKUnits(currUser.uid).catch(err => {
+          console.error("Migration failed in background:", err);
+        });
         
       } else {
+        setUser(null);
         setProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
   }, []);
 
