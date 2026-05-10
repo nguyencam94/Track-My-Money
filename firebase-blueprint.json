@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user settings and financial preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "currency": { "type": "string", "default": "VND" },
+        "monthlyBudget": { "type": "number" },
+        "editPassword": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Transaction": {
+      "title": "Financial Transaction",
+      "description": "Records of income and expenses.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "note": { "type": "string" },
+        "debtId": { "type": "string", "description": "Optional: Link to a debt if this is a payment." }
+      },
+      "required": ["userId", "amount", "type", "date"]
+    },
+    "Debt": {
+      "title": "Debt or Loan",
+      "description": "Tracks loans, installments, and debts.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "lender": { "type": "string" },
+        "principalAmount": { "type": "number", "description": "The original amount borrowed" },
+        "totalAmount": { "type": "number", "description": "The total amount to be repaid (including interest)" },
+        "remainingAmount": { "type": "number" },
+        "monthlyInstallment": { "type": "number" },
+        "totalPeriods": { "type": "number", "description": "Total number of installment periods" },
+        "completedPeriods": { "type": "number", "description": "Number of periods already paid" },
+        "interestRate": { "type": "number", "description": "Annual interest rate in percentage" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "paid"] },
+        "category": { "type": "string", "enum": ["installment", "loan", "other"] }
+      },
+      "required": ["userId", "title", "totalAmount", "startDate", "status"]
+    },
+    "PaymentSchedule": {
+      "title": "Debt Payment Installment",
+      "description": "A single scheduled payment for a debt.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "debtId": { "type": "string" },
+        "userId": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "paid"] },
+        "paidAt": { "type": "string", "format": "date-time" },
+        "transactionId": { "type": "string", "description": "Reference to the transaction record once paid." }
+      },
+      "required": ["debtId", "userId", "dueDate", "amount", "status"]
+    },
+    "Fund": {
+      "title": "Financial Fund",
+      "description": "A specific bucket of money for a purpose.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["consumption", "savings", "debt", "investment"] },
+        "balance": { "type": "number" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "type", "balance"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "/users/{userId}/transactions": {
+      "schema": "Transaction",
+      "description": "User's income and expense records."
+    },
+    "/users/{userId}/debts": {
+      "schema": "Debt",
+      "description": "User's debt and loan tracking."
+    },
+    "/users/{userId}/debts/{debtId}/schedule": {
+      "schema": "PaymentSchedule",
+      "description": "Scheduled installments for a specific debt."
+    },
+    "/users/{userId}/funds": {
+      "schema": "Fund",
+      "description": "User's categorized financial funds."
+    }
+  }
+}

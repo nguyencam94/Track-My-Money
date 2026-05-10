@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 0.1 Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Helpers
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 256 &&
+             (data.get('displayName', '') is string && data.get('displayName', '').size() <= 256) &&
+             (data.get('currency', 'VND') in ['VND', 'USD', 'EUR']) &&
+             (data.get('monthlyBudget', 0) is number) &&
+             (data.get('editPassword', null) == null || (data.editPassword is string && data.editPassword.size() <= 64)) &&
+             (data.get('createdAt', null) == null || data.createdAt is string);
+    }
+
+    function isValidTransaction(data) {
+      return data.userId == request.auth.uid &&
+             data.amount is number && data.amount >= 0 &&
+             data.type in ['income', 'expense'] &&
+             data.date is timestamp &&
+             (data.get('category', '') is string && data.get('category', '').size() <= 100) &&
+             (data.get('note', '') is string && data.get('note', '').size() <= 1000) &&
+             (data.get('debtId', null) == null || isValidId(data.debtId)) &&
+             (data.get('fundId', null) == null || isValidId(data.fundId));
+    }
+
+    function isValidDebt(data) {
+      return data.userId == request.auth.uid &&
+             data.title is string && data.title.size() <= 200 &&
+             data.totalAmount is number && data.totalAmount >= 0 &&
+             data.remainingAmount is number && data.remainingAmount >= 0 &&
+             data.status in ['active', 'paid'] &&
+             data.startDate is timestamp &&
+             (data.get('lender', '') is string && data.get('lender', '').size() <= 200) &&
+             (data.get('principalAmount', 0) is number) &&
+             (data.get('category', '') is string && data.get('category', '').size() <= 100) &&
+             (data.get('totalPeriods', 0) is number) &&
+             (data.get('completedPeriods', 0) is number) &&
+             (data.get('monthlyInstallment', 0) is number) &&
+             (data.get('endDate', null) == null || data.endDate is timestamp);
+    }
+
+    function isValidSchedule(data) {
+      return data.userId == request.auth.uid &&
+             isValidId(data.debtId) &&
+             data.dueDate is timestamp &&
+             data.amount is number && data.amount > 0 &&
+             data.status in ['pending', 'paid'];
+    }
+
+    function isValidFund(data) {
+      return data.userId == request.auth.uid &&
+             data.name is string && data.name.size() <= 100 &&
+             data.type in ['consumption', 'savings', 'debt', 'investment'] &&
+             data.balance is number &&
+             (data.get('description', '') is string && data.get('description', '').size() <= 500) &&
+             (data.get('icon', '') is string && data.get('icon', '').size() <= 50) &&
+             (data.get('createdAt', null) == null || data.createdAt is timestamp);
+    }
+
+    // Collection Matches
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && 
+                    isValidUser(incoming()) && 
+                    incoming().keys().hasAll(['uid', 'email', 'displayName', 'currency', 'monthlyBudget', 'createdAt']) &&
+                    incoming().keys().size() == 6;
+      allow update: if isOwner(userId) && isValidUser(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'currency', 'monthlyBudget', 'editPassword']);
+
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransaction(incoming());
+        allow update: if isOwner(userId) && isValidTransaction(incoming()) &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'type', 'category', 'note', 'date', 'fundId', 'debtId']);
+        allow delete: if isOwner(userId);
+      }
+
+      match /debts/{debtId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidDebt(incoming());
+        allow update: if isOwner(userId) && isValidDebt(incoming()) &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['title', 'lender', 'principalAmount', 'totalAmount', 'remainingAmount', 'monthlyInstallment', 'totalPeriods', 'completedPeriods', 'startDate', 'category', 'status', 'endDate']);
+        allow delete: if isOwner(userId);
+
+        match /schedule/{scheduleId} {
+          allow read: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidSchedule(incoming());
+          allow update: if isOwner(userId) && isValidSchedule(incoming()) &&
+                        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paidAt', 'transactionId']);
+          allow delete: if isOwner(userId);
+        }
+      }
+
+      match /funds/{fundId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidFund(incoming());
+        allow update: if isOwner(userId) && isValidFund(incoming()) &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'name', 'description', 'icon']);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
