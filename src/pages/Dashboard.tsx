@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTransactionModal } from '../context/TransactionModalContext';
 import { useTransferModal } from '../context/TransferModalContext';
 import { subscribeTransactions, subscribeDebts, subscribeFunds, initializeFunds, updateFundBalance, resetAllFunds, deleteAllTransactions } from '../lib/services';
-import { formatCurrency, cn } from '../lib/utils';
+import { formatCurrency, cn, getCategoryColor } from '../lib/utils';
 import { Plus, TrendingUp, TrendingDown, Wallet, ArrowUpRight, Clock, ShoppingBag, PiggyBank, CreditCard, Briefcase, ChevronRight, Edit2, RotateCcw, Trash2, X, ArrowRightLeft, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -313,36 +313,43 @@ export default function Dashboard() {
                       <div className="h-px flex-1 bg-indigo-50" />
                     </div>
                     <div className="space-y-2">
-                      {items.map((t: any) => (
-                        <div 
-                          key={t.id} 
-                          onClick={() => openTransactionModal(t)}
-                          className="group flex items-center justify-between p-4 bg-indigo-50/20 hover:bg-indigo-50/50 rounded-2xl border border-transparent hover:border-indigo-100 transition-all cursor-pointer"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={cn(
-                              "w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm",
-                              t.type === 'income' ? "bg-emerald-500" : "bg-indigo-600"
-                            )}>
-                              {t.type === 'income' ? <TrendingDown className="w-5 h-5 rotate-180" /> : <TrendingDown className="w-5 h-5" />}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-bold text-indigo-950 text-sm truncate">{t.category}</div>
-                              <div className="text-[10px] text-indigo-400 truncate flex items-center gap-1">
-                                <span>{t.date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
-                                <span>•</span>
-                                <span className="italic">{t.note || 'Không có ghi chú'}</span>
+                      {items.map((t: any) => {
+                        const colors = getCategoryColor(t.category);
+                        return (
+                          <div 
+                            key={t.id} 
+                            onClick={() => openTransactionModal(t)}
+                            className={cn(
+                              "group flex items-center justify-between p-4 rounded-2xl border-l-4 transition-all cursor-pointer hover:scale-[1.01] shadow-sm",
+                              colors.bg,
+                              colors.text.split(' ')[2]
+                            )}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-all group-hover:scale-105",
+                                colors.icon
+                              )}>
+                                {t.type === 'income' ? <TrendingUp className="w-5 h-5 rotate-180" /> : <TrendingDown className="w-5 h-5" />}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-black text-indigo-950 text-sm truncate uppercase tracking-tight">{t.category}</div>
+                                <div className="text-[10px] text-indigo-400 truncate flex items-center gap-1 font-bold">
+                                  <span>{t.date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <span>•</span>
+                                  <span className="italic font-medium">{t.note || 'Không có ghi chú'}</span>
+                                </div>
                               </div>
                             </div>
+                            <div className={cn(
+                              "font-black text-sm",
+                              t.type === 'income' ? "text-emerald-600" : "text-indigo-950"
+                            )}>
+                              {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
+                            </div>
                           </div>
-                          <div className={cn(
-                            "font-black text-sm",
-                            t.type === 'income' ? "text-emerald-600" : "text-indigo-950"
-                          )}>
-                            {t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount)}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

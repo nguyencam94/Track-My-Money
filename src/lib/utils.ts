@@ -61,3 +61,25 @@ export function numberToVietnameseWords(number: number): string {
 
   return (number < 0 ? 'Âm ' : '') + result.trim().charAt(0).toUpperCase() + result.trim().slice(1) + ' đồng';
 }
+
+export function getCategoryColor(category: string) {
+  const categories = [
+    { bg: 'bg-blue-50', icon: 'bg-blue-100 text-blue-600', text: 'text-blue-900 border-blue-200' },
+    { bg: 'bg-purple-50', icon: 'bg-purple-100 text-purple-600', text: 'text-purple-900 border-purple-200' },
+    { bg: 'bg-amber-50', icon: 'bg-amber-100 text-amber-600', text: 'text-amber-900 border-amber-200' },
+    { bg: 'bg-rose-50', icon: 'bg-rose-100 text-rose-600', text: 'text-rose-900 border-rose-200' },
+    { bg: 'bg-indigo-50', icon: 'bg-indigo-100 text-indigo-600', text: 'text-indigo-900 border-indigo-200' },
+    { bg: 'bg-emerald-50', icon: 'bg-emerald-100 text-emerald-600', text: 'text-emerald-900 border-emerald-200' },
+    { bg: 'bg-sky-50', icon: 'bg-sky-100 text-sky-600', text: 'text-sky-900 border-sky-200' },
+    { bg: 'bg-pink-50', icon: 'bg-pink-100 text-pink-600', text: 'text-pink-900 border-pink-200' },
+    { bg: 'bg-orange-50', icon: 'bg-orange-100 text-orange-600', text: 'text-orange-900 border-orange-200' },
+    { bg: 'bg-teal-50', icon: 'bg-teal-100 text-teal-600', text: 'text-teal-900 border-teal-200' }
+  ];
+  
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % categories.length;
+  return categories[index];
+}

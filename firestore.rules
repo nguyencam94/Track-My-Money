@@ -35,7 +35,7 @@ service cloud.firestore {
              (data.get('currency', 'VND') in ['VND', 'USD', 'EUR', 'k-VND']) &&
              (data.get('monthlyBudget', 0) is number) &&
              (data.get('editPassword', null) == null || (data.editPassword is string && data.editPassword.size() <= 64)) &&
-             (data.get('createdAt', null) == null || data.createdAt is string) &&
+             (data.get('createdAt', null) == null || data.createdAt is timestamp || data.createdAt is string) &&
              (data.get('migratedToKUnits', false) is bool);
     }
 
@@ -69,7 +69,7 @@ service cloud.firestore {
 
     function isValidSchedule(data) {
       return data.get('userId', request.auth.uid) == request.auth.uid &&
-             (data.get('debtId', 'valid') is string) &&
+             (data.get('debtId', null) == null || isValidId(data.debtId)) &&
              (data.get('dueDate', request.time) is timestamp) &&
              (data.get('amount', 0) is number && data.get('amount', 0) >= 0) &&
              (data.get('status', 'pending') in ['pending', 'paid']) &&
@@ -92,13 +92,13 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) &&
-                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'currency', 'monthlyBudget', 'editPassword', 'migratedToKUnits']);
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'currency', 'monthlyBudget', 'editPassword', 'migratedToKUnits', 'uid']);
 
       match /transactions/{transactionId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && isValidTransaction(incoming());
         allow update: if isOwner(userId) && isValidTransaction(incoming()) &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'type', 'category', 'note', 'date', 'fundId', 'debtId', 'isTransfer']);
+                      incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'type', 'category', 'note', 'date', 'fundId', 'debtId', 'isTransfer', 'userId']);
         allow delete: if isOwner(userId);
       }
 
@@ -106,14 +106,14 @@ service cloud.firestore {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && isValidDebt(incoming());
         allow update: if isOwner(userId) && isValidDebt(incoming()) &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['title', 'lender', 'principalAmount', 'totalAmount', 'remainingAmount', 'monthlyInstallment', 'totalPeriods', 'completedPeriods', 'startDate', 'category', 'status', 'endDate']);
+                      incoming().diff(existing()).affectedKeys().hasOnly(['title', 'lender', 'principalAmount', 'totalAmount', 'remainingAmount', 'monthlyInstallment', 'totalPeriods', 'completedPeriods', 'startDate', 'category', 'status', 'endDate', 'userId']);
         allow delete: if isOwner(userId);
 
         match /schedule/{scheduleId} {
           allow read: if isOwner(userId);
           allow create: if isOwner(userId) && isValidSchedule(incoming());
           allow update: if isOwner(userId) && isValidSchedule(incoming()) &&
-                        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paidAt', 'transactionId', 'amount']);
+                        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'paidAt', 'transactionId', 'amount', 'userId', 'debtId']);
           allow delete: if isOwner(userId);
         }
       }
@@ -122,7 +122,7 @@ service cloud.firestore {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && isValidFund(incoming());
         allow update: if isOwner(userId) && isValidFund(incoming()) &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'name', 'description', 'icon']);
+                      incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'name', 'description', 'icon', 'userId']);
         allow delete: if isOwner(userId);
       }
     }

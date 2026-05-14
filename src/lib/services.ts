@@ -444,21 +444,21 @@ export async function migrateDataToKUnits(userId: string) {
     
     if (userSnap.exists()) {
       const userData = userSnap.data();
-      // If already migrated, skip
-      if (userData.migratedToKUnits) return;
-
-      const updates: any = { migratedToKUnits: true };
+      const updates: any = {};
       
-      // Threshold lowered: common values in VND are usually > 10,000 (10k)
-      // Most transactions in k-unit won't exceed 10,000k (10 million VND) for daily tracking
-      if (userData.monthlyBudget > 10000) {
+      const MIGRATION_THRESHOLD = 5000; // Lower threshold to catch more items
+
+      if (userData.monthlyBudget > MIGRATION_THRESHOLD) {
         updates.monthlyBudget = userData.monthlyBudget / 1000;
+        updates.migratedToKUnits = true;
       }
       
-      await updateDoc(userRef, updates);
+      if (Object.keys(updates).length > 0) {
+        await updateDoc(userRef, updates);
+      }
     }
 
-    const MIGRATION_THRESHOLD = 10000;
+    const MIGRATION_THRESHOLD = 5000;
 
     // Fix funds
     const fundsSnap = await getDocs(collection(db, 'users', userId, 'funds'));

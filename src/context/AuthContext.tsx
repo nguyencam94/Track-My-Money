@@ -11,6 +11,8 @@ interface UserProfile {
   currency: string;
   monthlyBudget: number;
   editPassword?: string;
+  createdAt?: string;
+  migratedToKUnits?: boolean;
 }
 
 interface AuthContextType {

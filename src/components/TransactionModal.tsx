@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTransactionModal } from '../context/TransactionModalContext';
 import { addTransaction, updateTransaction, subscribeFunds, subscribeTransactions } from '../lib/services';
 import { formatCurrency, cn, numberToVietnameseWords } from '../lib/utils';
-import { X, DollarSign, Wallet, Clock } from 'lucide-react';
+import { X, DollarSign, Wallet, Clock, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function TransactionModal() {
@@ -95,7 +95,7 @@ export default function TransactionModal() {
   // Reset verification state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      if (editingTransaction && profile?.editPassword) {
+      if (editingTransaction?.id && profile?.editPassword) {
         setIsVerifyingPassword(true);
         setIsVerified(false);
       } else {
